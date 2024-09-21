@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("NbpExchangeApp")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+e89cf257b7967acfe66eeaecfec275a95851a40a")]
 [assembly: System.Reflection.AssemblyProductAttribute("NbpExchangeApp")]
 [assembly: System.Reflection.AssemblyTitleAttribute("NbpExchangeApp")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
