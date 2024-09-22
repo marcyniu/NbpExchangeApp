@@ -17,7 +17,7 @@ $ dotnet run
 #### Run app in watch mode to see code changes live:
 
 ```
-$ dotnet watch
+$ dotnet watch run
 ```
 
 ---
