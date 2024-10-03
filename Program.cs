@@ -1,6 +1,8 @@
 using NbpExchangeApp.Components;
+using NbpExchangeApp.Services;
 
 var builder = WebApplication.CreateBuilder(args);
+builder.Services.AddHttpClient<NbpApiService>();
 
 // Add services to the container.
 builder.Services.AddRazorComponents()

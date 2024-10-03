@@ -1,0 +1,65 @@
+@namespace NbpExchangeApp.Components.Pages
+
+@page "/exchange_table"
+
+@using NbpExchangeApp.BusinessModels
+@using NbpExchangeApp.Services
+@inject NbpApiService NbpApiService
+
+@rendermode InteractiveServer
+
+<button @onclick="FetchExchangeRates">Fetch Exchange Rates</button>
+
+@if (exchangeRates != null)
+{
+    <div>
+        <br/>
+        <h4>Exchange Rates</h4>
+
+        <h6>Table: <b>@exchangeRates.No</b></h6>
+        <h6>Date: <b>@exchangeRates.EffectiveDate</b></h6>
+
+        <table class="currency-table-class">
+            <thead>
+                <tr>
+                    <th>Currency/Country</th>
+                    <th>Currency Code</th>
+                    <th>Mid Exchange Rate</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (exchangeRates?.Rates != null)
+                {
+                    @foreach (var rate in exchangeRates.Rates)
+                    {
+                        <tr>
+                            <td style="text-align: left;">@rate.Currency</td>
+                            <td style="text-align: center;">@rate.Code</td>
+                            <td style="text-align: right;">@rate.Mid</td>
+                        </tr>
+                    }
+                }
+            </tbody
+        </table>
+    </div>
+}
+
+@code {
+    private List<TodoItem> todos = new();
+    string newTodo = "";
+    private ExchangeRates? exchangeRates;
+
+    void AddTodo()
+    {
+        if (!string.IsNullOrWhiteSpace(newTodo))
+        {
+            todos.Add(new TodoItem { Title = newTodo });
+            newTodo = string.Empty;
+        }
+    }
+
+    async Task FetchExchangeRates()
+    {
+        exchangeRates = await NbpApiService.GetExchangeRatesAsync();
+    }
+}

@@ -49,3 +49,8 @@ h1:focus {
 .darker-border-checkbox.form-check-input {
     border-color: #929292;
 }
+
+.currency-table-class, .currency-table-class th, .currency-table-class td {
+    border: 1px solid black;
+    border-collapse: collapse;
+}
