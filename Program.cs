@@ -3,6 +3,7 @@ using NbpExchangeApp.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddHttpClient<NbpApiService>();
+builder.Services.AddMemoryCache();
 
 // Add services to the container.
 builder.Services.AddRazorComponents()

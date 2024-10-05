@@ -1,41 +1,46 @@
-using System.Net.Http;
-using System.Net.Http.Json;
 using System.Text.Json;
-using System.Threading.Tasks;
 using NbpExchangeApp.BusinessModels;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace NbpExchangeApp.Services
 {
     public class NbpApiService
     {
         private readonly HttpClient _httpClient;
+        private readonly IMemoryCache _memoryCache;
 
-        public NbpApiService()
-        {
-            _httpClient = new HttpClient();
-        }
-
-        public NbpApiService(HttpClient httpClient)
+        public NbpApiService(HttpClient httpClient, IMemoryCache memoryCache)
         {
             _httpClient = httpClient;
+            _memoryCache = memoryCache;
         }
 
-        public async Task<ExchangeRates> GetExchangeRatesAsync()
+        public async Task<ExchangeRates?> GetExchangeTableRatesAsync(string tableType = "A")
         {
-            var response = await _httpClient.GetAsync("https://api.nbp.pl/api/exchangerates/tables/A?format=json");
-            
-            // Add code to get response content
-            if (!response.IsSuccessStatusCode)
-            {
-                throw new HttpRequestException($"Failed to fetch exchange rates. Status code: {response.StatusCode}");
-            }
+            string cacheKeyOrRequestString = $"https://api.nbp.pl/api/exchangerates/tables/{tableType}?format=json";
 
-            var content = await response.Content.ReadAsStringAsync();
-            var exchangeRates = JsonSerializer.Deserialize<List<ExchangeRates>>(content)?.FirstOrDefault();
-
-            if (exchangeRates == null)
+            ExchangeRates? exchangeRates = null;
+            if (!_memoryCache.TryGetValue(cacheKeyOrRequestString, out exchangeRates))
             {
-                throw new HttpRequestException("Failed to deserialize exchange rates.");
+                var response = await _httpClient.GetAsync(cacheKeyOrRequestString);
+                
+                // Add code to get response content
+                if (!response.IsSuccessStatusCode)
+                {
+                    throw new HttpRequestException($"Failed to fetch exchange rates. Status code: {response.StatusCode}");
+                }
+
+                var content = await response.Content.ReadAsStringAsync();
+                exchangeRates = JsonSerializer.Deserialize<List<ExchangeRates>>(content)?.FirstOrDefault() ?? new ExchangeRates();
+
+                if (exchangeRates == null)
+                {
+                    throw new HttpRequestException("Failed to deserialize exchange rates.");
+                }
+
+                var cacheEntryOptions = new MemoryCacheEntryOptions().SetSlidingExpiration(TimeSpan.FromMinutes(60)); // Cache for 60 minutes
+
+                _memoryCache.Set(cacheKeyOrRequestString, exchangeRates, cacheEntryOptions);
             }
 
             return exchangeRates;

@@ -9,10 +9,13 @@ namespace NbpExchangeApp.BusinessModels
 
         [JsonPropertyName("no")]
         public string? No { get; set; }
-        
+
         [JsonPropertyName("effectiveDate")]
         public string? EffectiveDate { get; set; }
-        
+
+        [JsonPropertyName("tradingDate")]
+        public string? TradingDate { get; set; }
+
         [JsonPropertyName("rates")]
         public Rate[]? Rates { get; set; }
     }
