@@ -5,9 +5,11 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddHttpClient<NbpApiService>();
 builder.Services.AddMemoryCache();
 
+// Register your services here
+builder.Services.AddScoped<NbpExchangeRatesService>();
+
 // Add services to the container.
-builder.Services.AddRazorComponents()
-    .AddInteractiveServerComponents();
+builder.Services.AddRazorComponents().AddInteractiveServerComponents();
 
 var app = builder.Build();
 
