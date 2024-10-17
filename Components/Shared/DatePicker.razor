@@ -1,0 +1,26 @@
+<div class="form-group" style="display: inline-block; max-width: auto;">
+    <label for="datePicker" style="display: inline-block; max-width: auto;">Select Date:</label>
+    <InputDate id="datePicker" class="form-control" style="display: inline-block; max-width: auto;" @bind-Value="SelectedDate" />
+</div>
+
+@code {
+    private string test = "Original";
+
+    public DateTime selectedDate { get; set; } = DateTime.Today;
+
+    [Parameter]
+    public EventCallback<DateTime> OnValueChanged { get; set; }
+
+    private DateTime SelectedDate
+    {
+        get => selectedDate;
+        set
+        {
+            if (selectedDate != value)
+            {
+                selectedDate = value;
+                OnValueChanged.InvokeAsync(selectedDate);
+            }
+        }
+    }
+}

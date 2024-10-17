@@ -4,19 +4,13 @@ using Microsoft.Extensions.Caching.Memory;
 
 namespace NbpExchangeApp.Services
 {
-    public class NbpExchangeRatesService
+    public class NbpExchangeRatesService(IMemoryCache memoryCache)
     {
 
         private const string _apiHost = "https://api.nbp.pl";
 
-        private readonly IMemoryCache _memoryCache;
-        private readonly NbpApiService _nbpApiService;
-
-        public NbpExchangeRatesService(IMemoryCache memoryCache)
-        {
-            _memoryCache = memoryCache;
-            _nbpApiService = new NbpApiService();
-        }
+        private readonly IMemoryCache _memoryCache = memoryCache;
+        private readonly NbpApiService _nbpApiService = new();
 
         public async Task<string?> GetDataFromCacheOrApiAsync(string? path = null)
         {
@@ -34,10 +28,15 @@ namespace NbpExchangeApp.Services
             return jsonString;
         }
 
-        public async Task<ExchangeRates?> GetExchangeTableRatesAsync(string tableType = "A")
+        public async Task<ExchangeRates?> GetExchangeTableRatesAsync(
+            string tableType = "A",
+            string? tableDateString = null
+        )
         {
-            ExchangeRates exchangeRates = new ExchangeRates();
-            string path = $"/api/exchangerates/tables/{tableType}?format=json";
+            ExchangeRates exchangeRates = new();
+            string path = $"/api/exchangerates/tables/{tableType}";
+            path += tableDateString != null ? $"/{tableDateString}" : "";
+            path += $"?format=json";
 
             string? data = await GetDataFromCacheOrApiAsync(path).ConfigureAwait(false);
             
@@ -49,7 +48,6 @@ namespace NbpExchangeApp.Services
                 {
                     throw new HttpRequestException("Failed to deserialize exchange rates.");
                 }
-
             }
 
             return exchangeRates;

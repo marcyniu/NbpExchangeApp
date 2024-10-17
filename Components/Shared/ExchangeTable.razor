@@ -1,0 +1,89 @@
+@using NbpExchangeApp.BusinessModels
+
+@if (exchangeRates != null)
+{
+    <div>
+    <br />
+    <h5><b><u>Exchange Rates</u></b></h5>
+
+    <h6>Table: <b>@exchangeRates.No</b></h6>
+    <h6>Efactive Date: <b>@exchangeRates.EffectiveDate</b></h6>
+    @if (exchangeRates.TradingDate != null)
+        {
+            <h6>Trading Date: <b>@exchangeRates.TradingDate</b></h6>
+        }
+
+        <div class="row">
+            <div class="col">
+                <table class="table table-striped table-hover table-sm">
+                    <thead>
+                        <tr>
+                            <th>Currency/Country</th>
+                            <th>Currency Code</th>
+                            @if (exchangeRates.TradingDate != null)
+                            {
+                                <th>Ask Exchange Rate</th>
+                                <th>Bid Exchange Rate</th>
+                            }
+                            else
+                            {
+                                <th>Mid Exchange Rate</th>
+                            }
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (exchangeRates?.Rates != null)
+                        {
+                            @foreach (var rate in exchangeRates.Rates)
+                            {
+                                <tr>
+                                    <td style="text-align: left;">@rate.Currency</td>
+                                    <td style="text-align: center;">@rate.Code</td>
+                                    @if (exchangeRates.TradingDate != null)
+                                    {
+                                        <td style="text-align: right;">@rate.Ask</td>
+                                        <td style="text-align: right;">@rate.Bid</td>
+                                    }
+                                    else
+                                    {
+                                        <td style="text-align: right;">@rate.Mid</td>
+                                    }
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+            <div class="col"></div>
+        </div>
+    </div>
+}
+else
+{
+    <br />
+    <br />
+
+    @if (isDataLoading == true)
+    {
+        <div class="row">
+            <div class="col">
+                <div style="display: flex; justify-content: center;">
+                    <div class="spinner-border text-primary" role="status"></div>
+                    &nbsp;&nbsp;<span class="text-primary" style="font-size: 1.5em;">Loading...</span>
+                </div>
+            </div>
+            <div class="col"></div>
+        </div>
+    } else {
+        <div class="alert alert-warning" role="alert" style="width: 25%;">
+            No exchange rates requested.
+        </div>
+    }
+}
+
+@code {
+    [Parameter]
+    public ExchangeRates? exchangeRates { get; set; } = null;
+    [Parameter]
+    public bool isDataLoading { get; set; } = false;
+}

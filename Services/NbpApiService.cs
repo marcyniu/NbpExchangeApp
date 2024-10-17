@@ -13,10 +13,7 @@ namespace NbpExchangeApp.Services
         {
             string? jsonString = null;
 
-            if (cacheKeyOrRequestString == null)
-            {
-                throw new ArgumentNullException(nameof(cacheKeyOrRequestString));
-            }
+            ArgumentNullException.ThrowIfNull(cacheKeyOrRequestString);
 
             HttpResponseMessage response = await _httpClient.GetAsync(cacheKeyOrRequestString);
 
