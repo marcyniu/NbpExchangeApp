@@ -69,7 +69,10 @@
         // Display spinner.
         isDataLoading = true;
         // Fetch exchange rates.
-        (exchangeRates, errorMessage) = await NbpExchangeRatesService.GetExchangeTableRatesAsync(selectedTable, selectedDate.ToString("yyyy-MM-dd")).ConfigureAwait(false);
+        (exchangeRates, errorMessage) = await NbpExchangeRatesService.GetExchangeTableRatesAsync(
+            selectedTable,
+            selectedDate.ToString("yyyy-MM-dd")
+        ).ConfigureAwait(false);
         // Hide spinner.
         isDataLoading = false;
     }

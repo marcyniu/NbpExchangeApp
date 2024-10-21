@@ -1,0 +1,93 @@
+@namespace NbpExchangeApp.Components.Pages
+
+@page "/IndividualCurrency"
+
+@using NbpExchangeApp.BusinessModels
+@using NbpExchangeApp.Services
+@using NbpExchangeApp.Components
+@using NbpExchangeApp.Components.Shared
+
+@inject NbpExchangeRatesService NbpExchangeRatesService
+
+@rendermode InteractiveServer
+
+<h2>Individual Currency</h2>
+
+<br />
+<br />
+
+<span> add all the pickers for table, currency code, start and end date </span>
+
+<p>@selectedTable</p>
+<p>@currencyCode</p>
+<p>@startDate</p>
+<p>@endDate</p>
+
+<p>@errorMessage</p>
+
+<br />
+<br />
+
+<button type="button" class="btn btn-primary" @onclick="FetchCurrencyRates">Fetch Currency Rates</button>
+
+
+@if (isDataLoading == true)
+{
+    <div class="row">
+        <div class="col">
+            <div style="display: flex; justify-content: center;">
+                <div class="spinner-border text-primary" role="status"></div>
+                &nbsp;&nbsp;<span class="text-primary" style="font-size: 1.5em;">Loading...</span>
+            </div>
+        </div>
+    <div class="col"></div>
+</div>
+}
+
+@code {
+    private string currencyCode = "USD"; // Default value
+    private string selectedTable = "A"; // Default value
+    private ExchangeCurrency? exchangeCurrency;
+    private string? errorMessage;
+    private bool isDataLoading = false;
+    private DateTime startDate { get; set; } = DateTime.Parse("2024-10-14");
+    private DateTime endDate { get; set; } = DateTime.Parse("2024-10-18");
+    private string json = "";
+
+    private string SelectedTable
+    {
+        get => selectedTable;
+        set
+        {
+            if (selectedTable != value)
+            {
+                selectedTable = value;
+                exchangeCurrency = null; // Reset exchangeCurrency when selectedTable changes
+                errorMessage = null; // Reset errorMessage when selectedTable changes
+            }
+        }
+    }
+
+    @* private void HandleValueChanged(DateTime value)
+{
+selectedDate = value;
+exchangeRates = null; // Reset exchangeRates when selectedTable changes
+errorMessage = null; // Reset errorMessage when selectedTable changes
+} *@
+
+    async Task FetchCurrencyRates()
+    {
+        // Display spinner.
+        isDataLoading = true;
+        // Fetch exchange rates.
+        (exchangeCurrency, errorMessage) = await NbpExchangeRatesService.GetExchangeCurrencyForTableAndPeriodAsync(
+            currencyCode,
+            selectedTable,
+            startDate.ToString("yyyy-MM-dd"),
+            endDate.ToString("yyyy-MM-dd")
+        ).ConfigureAwait(false);
+        // Hide spinner.
+
+        isDataLoading = false;
+    }
+}

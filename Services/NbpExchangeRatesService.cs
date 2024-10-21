@@ -70,6 +70,42 @@ namespace NbpExchangeApp.Services
             return (exchangeRates, errorMessage);
         }
 
+        public async Task<(ExchangeCurrency?, string?)> GetExchangeCurrencyForTableAndPeriodAsync(
+            string currencyCode,
+            string tableType = "A",
+            string? startDateString = null,
+            string? endDateString = null
+        )
+        {
+            ExchangeCurrency exchangeCurrency = new();
+            string? errorMessage = null;
+            string path = $"/api/exchangerates/rates/{tableType}/{currencyCode}";
+            path += startDateString != null ? $"/{startDateString}" : "";
+            path += endDateString != null ? $"/{endDateString}" : "";
+            path += $"?format=json";
+
+            string? data = await GetDataFromCacheOrApiAsync(path).ConfigureAwait(false);
+
+            if (data != null)
+            {
+                if (IsValidJson(data))
+                {
+                    exchangeCurrency = JsonSerializer.Deserialize<ExchangeCurrency>(data) ?? exchangeCurrency;
+
+                    if (exchangeCurrency == null)
+                    {
+                        errorMessage = "Failed to deserialize exchange currency.";
+                    }
+                }
+                else
+                {
+                    errorMessage = data;
+                }
+            }
+
+            return (exchangeCurrency, errorMessage);
+        }
+
         private static bool IsValidJson(string? jsonString)
         {
             if (string.IsNullOrWhiteSpace(jsonString))
