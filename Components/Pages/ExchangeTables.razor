@@ -34,11 +34,12 @@
 
 <button type="button" class="btn btn-primary" @onclick="FetchExchangeRates" disabled="@exchangeRates">Fetch Exchange Rates</button>
 
-<ExchangeTable exchangeRates="exchangeRates" isDataLoading="isDataLoading"/>
+<ExchangeTable exchangeRates="@exchangeRates" errorMessage="@errorMessage" isDataLoading="@isDataLoading"/>
 
 @code {
     private string selectedTable = "A"; // Default value
     private ExchangeRates? exchangeRates;
+    private string? errorMessage;
     private bool isDataLoading = false;
     private DateTime selectedDate {get; set;} = DateTime.Today;
 
@@ -51,6 +52,7 @@
             {
                 selectedTable = value;
                 exchangeRates = null; // Reset exchangeRates when selectedTable changes
+                errorMessage = null; // Reset errorMessage when selectedTable changes
             }
         }
     }
@@ -59,6 +61,7 @@
     {
         selectedDate = value;
         exchangeRates = null; // Reset exchangeRates when selectedTable changes
+        errorMessage = null; // Reset errorMessage when selectedTable changes
     }
 
     async Task FetchExchangeRates()
@@ -66,7 +69,7 @@
         // Display spinner.
         isDataLoading = true;
         // Fetch exchange rates.
-        exchangeRates = await NbpExchangeRatesService.GetExchangeTableRatesAsync(selectedTable, selectedDate.ToString("yyyy-MM-dd")).ConfigureAwait(false);
+        (exchangeRates, errorMessage) = await NbpExchangeRatesService.GetExchangeTableRatesAsync(selectedTable, selectedDate.ToString("yyyy-MM-dd")).ConfigureAwait(false);
         // Hide spinner.
         isDataLoading = false;
     }

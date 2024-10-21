@@ -14,26 +14,37 @@ namespace NbpExchangeApp.Services
 
         public async Task<string?> GetDataFromCacheOrApiAsync(string? path = null)
         {
+            var errorMessage = string.Empty;
+            var jsonString = string.Empty;
+            var cacheEntryOptions = new MemoryCacheEntryOptions().SetSlidingExpiration(TimeSpan.FromMinutes(60)); // Cache for 60 minutes
             string cacheKeyOrRequestString = $"{_apiHost}{path}";
 
-            if (!_memoryCache.TryGetValue(cacheKeyOrRequestString, out string? jsonString))
+            if (!_memoryCache.TryGetValue(cacheKeyOrRequestString, out string? responseString))
             {
-                jsonString = await _nbpApiService.GetExchangeTableRatesAsync(cacheKeyOrRequestString).ConfigureAwait(false);
+                (jsonString, errorMessage) = await _nbpApiService.GetExchangeTableRatesAsync(cacheKeyOrRequestString).ConfigureAwait(false);
 
-                var cacheEntryOptions = new MemoryCacheEntryOptions().SetSlidingExpiration(TimeSpan.FromMinutes(60)); // Cache for 60 minutes
-
-                _memoryCache.Set(cacheKeyOrRequestString, jsonString, cacheEntryOptions);
+                if (!string.IsNullOrEmpty(jsonString))
+                {
+                    _memoryCache.Set(cacheKeyOrRequestString, jsonString, cacheEntryOptions);
+                    responseString = jsonString;
+                }
+                else if (!string.IsNullOrEmpty(errorMessage))
+                {
+                    _memoryCache.Set(cacheKeyOrRequestString, errorMessage, cacheEntryOptions);
+                    responseString = errorMessage;
+                }
             }
 
-            return jsonString;
+            return responseString;
         }
 
-        public async Task<ExchangeRates?> GetExchangeTableRatesAsync(
+        public async Task<(ExchangeRates?, string?)> GetExchangeTableRatesAsync(
             string tableType = "A",
             string? tableDateString = null
         )
         {
             ExchangeRates exchangeRates = new();
+            string? errorMessage = null;
             string path = $"/api/exchangerates/tables/{tableType}";
             path += tableDateString != null ? $"/{tableDateString}" : "";
             path += $"?format=json";
@@ -42,15 +53,39 @@ namespace NbpExchangeApp.Services
             
             if (data != null)
             {
-                exchangeRates = JsonSerializer.Deserialize<List<ExchangeRates>>(data)?.FirstOrDefault() ?? exchangeRates;
+                if (IsValidJson(data)) {
+                    exchangeRates = JsonSerializer.Deserialize<List<ExchangeRates>>(data)?.FirstOrDefault() ?? exchangeRates;
 
-                if (exchangeRates == null)
+                    if (exchangeRates == null)
+                    {
+                        errorMessage = "Failed to deserialize exchange rates.";
+                    }
+                }
+                else
                 {
-                    throw new HttpRequestException("Failed to deserialize exchange rates.");
+                    errorMessage = data;
                 }
             }
 
-            return exchangeRates;
+            return (exchangeRates, errorMessage);
+        }
+
+        private static bool IsValidJson(string? jsonString)
+        {
+            if (string.IsNullOrWhiteSpace(jsonString))
+            {
+                return false;
+            }
+
+            try
+            {
+                JsonDocument.Parse(jsonString);
+                return true;
+            }
+            catch (JsonException)
+            {
+                return false;
+            }
         }
     }
 }
