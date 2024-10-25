@@ -1,62 +1,29 @@
-@namespace NbpExchangeApp.Components.Pages
-
-@page "/IndividualCurrency"
-
-@using NbpExchangeApp.BusinessModels
-@using NbpExchangeApp.Services
-@using NbpExchangeApp.Components
-@using NbpExchangeApp.Components.Shared
-
-@inject NbpExchangeRatesService NbpExchangeRatesService
-
-@rendermode InteractiveServer
-
-<h2>Individual Currency</h2>
-
-<br />
-
-<ExchangeTablePicker OnValueChanged="HandleExchangeTableChange"/>
+@using Microsoft.AspNetCore.Components.Forms
 
 <div class="mb-3 row">
-    <label for="SelectedTable" class="col-sm-2 col-form-label text-end">Select Currency:</label>
+    <label for="SelectedPeriod" class="col-sm-2 col-form-label text-end">Pick Period:</label>
     <div class="col-auto">
-        <select @bind="currencyCode" class="form-select form-select-sm">
-            @foreach (var currency in NbpExchangeApp.Library.Constants.CurrencyCodes)
-            {
-                <option value="@(currency.Key)">[@(currency.Key)] - @(currency.Value)</option>
-            }
+        <select @bind="SelectedPeriod" class="form-select form-select-sm">
+            <option value="today">Today</option>
+            <option value="yesterday">Yesterday</option>
+            <option value="last7days">Last 7 Days</option>
+            <option value="thisweek">This Week</option>
+            <option value="lastweek">Last Week</option>
+            <option value="thismonth">This Month</option>
+            <option value="lastmonth">Last Month</option>
+            <option value="thisquarter">This Quarter</option>
+            <option value="lastquarter">Last Quarter</option>
         </select>
     </div>
 </div>
 
-<DateRangePicker OnValueChanged="HandleDateRangeChanged"/>
-
-<span> add all the pickers for table, currency code, start and end date </span>
-
-<p>@selectedTable</p>
-<p>@currencyCode</p>
-<p>@startDate</p>
-<p>@endDate</p>
-
-<p>@errorMessage</p>
-
-<br />
-<br />
-
-<button type="button" class="btn btn-primary" @onclick="FetchCurrencyRates">Fetch Currency Rates</button>
-
-<LoadingSpinner isDataLoading="@isDataLoading" />
 
 @code {
-    private string currencyCode = "USD"; // Default value
-    private string selectedTable = "A"; // Default value
-    private ExchangeCurrency? exchangeCurrency;
-    private string? errorMessage;
-    private bool isDataLoading = false;
+    [Parameter]
+    public EventCallback<List<DateTime>> OnValueChanged { get; set; }
+
     private DateTime startDate { get; set; } = DateTime.Now;
     private DateTime endDate { get; set; } = DateTime.Now;
-    private string json = "";
-
     private string selectedPeriod = "today"; // Default value
 
     private string SelectedPeriod {
@@ -122,45 +89,7 @@
                 endDate = DateTime.Today;
                 break;
         }
-    }
 
-    private void HandleExchangeTableChange(string value)
-    {
-        selectedTable = value;
-    }
-
-    private string SelectedTable
-    {
-        get => selectedTable;
-        set
-        {
-            if (selectedTable != value)
-            {
-                selectedTable = value;
-                exchangeCurrency = null; // Reset exchangeCurrency when selectedTable changes
-                errorMessage = null; // Reset errorMessage when selectedTable changes
-            }
-        }
-    }
-
-    private void HandleDateRangeChanged(List<DateTime> dates)
-    {
-        this.startDate = dates[0];
-        this.endDate = dates[1];
-    }
-
-    async Task FetchCurrencyRates()
-    {
-        // Display spinner.
-        isDataLoading = true;
-        // Fetch exchange rates.
-        (exchangeCurrency, errorMessage) = await NbpExchangeRatesService.GetExchangeCurrencyForTableAndPeriodAsync(
-            currencyCode,
-            selectedTable,
-            startDate.ToString("yyyy-MM-dd"),
-            endDate.ToString("yyyy-MM-dd")
-        ).ConfigureAwait(false);
-        // Hide spinner.
-        isDataLoading = false;
+        OnValueChanged.InvokeAsync([startDate, endDate]);
     }
 }

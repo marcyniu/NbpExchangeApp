@@ -1,9 +1,12 @@
 @using Microsoft.AspNetCore.Components.Forms
 
-<div class="form-group" style="display: inline-block; max-width: auto;">
-    <label for="datePicker" style="display: inline-block; max-width: auto;">Select Date:</label>
-    <InputDate id="datePicker" class="form-control" style="display: inline-block; max-width: auto;" @bind-Value="SelectedDate" />
+<div class="mb-3 row">
+    <label for="SelectedTable" class="col-sm-2 col-form-label text-end">Select Date:</label>
+    <div class="col-auto">
+        <InputDate id="datePicker" class="form-control form-control-sm" style="max-width: auto;" @bind-Value="SelectedDate" />
+    </div>
 </div>
+
 
 @code {
     public DateTime selectedDate { get; set; } = DateTime.Today;

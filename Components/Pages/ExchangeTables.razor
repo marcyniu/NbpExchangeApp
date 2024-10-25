@@ -11,26 +11,9 @@
 
 @rendermode InteractiveServer
 
-<div class="mb-3 row">
-    <label for="SelectedTable" class="col-sm-2 col-form-label text-end">Select Exchange Table:</label>
-    <div class="col-sm-10">
-        <select @bind="SelectedTable" class="form-select form-select-sm" style="width: auto;">
-            <option value="A">Table A</option>
-            <option value="B">Table B</option>
-            <option value="C">Table C</option>
-        </select>
-    </div>
-</div>
+<ExchangeTablePicker OnValueChanged="HandleExchangeTableChange"/>
 
-<DatePicker OnValueChanged="HandleValueChanged"/>
-
-<br />
-<br />
-
-<span>@selectedDate</span>
-
-<br />
-<br />
+<DatePicker OnValueChanged="HandleDateChanged"/>
 
 <button type="button" class="btn btn-primary" @onclick="FetchExchangeRates" disabled="@exchangeRates">Fetch Exchange Rates</button>
 
@@ -51,15 +34,25 @@
             if (selectedTable != value)
             {
                 selectedTable = value;
-                exchangeRates = null; // Reset exchangeRates when selectedTable changes
-                errorMessage = null; // Reset errorMessage when selectedTable changes
+                ResetValuesDependOnSelectedValues();
             }
         }
     }
 
-    private void HandleValueChanged(DateTime value)
+    private void HandleDateChanged(DateTime value)
     {
         selectedDate = value;
+        ResetValuesDependOnSelectedValues();
+    }
+
+    private void HandleExchangeTableChange(string value)
+    {
+        selectedTable = value;
+        ResetValuesDependOnSelectedValues();
+    }
+
+    private void ResetValuesDependOnSelectedValues()
+    {
         exchangeRates = null; // Reset exchangeRates when selectedTable changes
         errorMessage = null; // Reset errorMessage when selectedTable changes
     }
