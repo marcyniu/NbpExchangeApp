@@ -14,7 +14,37 @@
 <h2>Individual Currency</h2>
 
 <br />
+
+<div class="mb-3 row">
+    <label for="SelectedTable" class="col-sm-2 col-form-label text-end">Select Currency:</label>
+    <div class="col-sm-3">
+        <select @bind="currencyCode" class="form-select">
+            @foreach (var currency in NbpExchangeApp.Library.Constants.CurrencyCodes)
+            {
+                <option value="@(currency.Key)">[@(currency.Key)] - @(currency.Value)</option>
+            }
+        </select>
+    </div>
+</div>
+
 <br />
+
+<div class="mb-3 row">
+    <label for="SelectedPeriod" class="col-sm-2 col-form-label text-end">Pick Period:</label>
+    <div class="col-sm-3">
+        <select @bind="SelectedPeriod" class="form-select">
+            <option value="today">Today</option>
+            <option value="yesterday">Yesterday</option>
+            <option value="last7days">Last 7 Days</option>
+            <option value="thisweek">This Week</option>
+            <option value="lastweek">Last Week</option>
+            <option value="thismonth">This Month</option>
+            <option value="lastmonth">Last Month</option>
+            <option value="thisquarter">This Quarter</option>
+            <option value="lastquarter">Last Quarter</option>
+        </select>
+    </div>
+</div>
 
 <span> add all the pickers for table, currency code, start and end date </span>
 
@@ -50,9 +80,76 @@
     private ExchangeCurrency? exchangeCurrency;
     private string? errorMessage;
     private bool isDataLoading = false;
-    private DateTime startDate { get; set; } = DateTime.Parse("2024-10-14");
-    private DateTime endDate { get; set; } = DateTime.Parse("2024-10-18");
+    private DateTime startDate { get; set; } = DateTime.Now;
+    private DateTime endDate { get; set; } = DateTime.Now;
     private string json = "";
+
+    private string selectedPeriod = "today"; // Default value
+
+    private string SelectedPeriod {
+        get => selectedPeriod;
+        set
+        {
+            if (selectedPeriod != value)
+            {
+                selectedPeriod = value;
+                UpdateDateRange(selectedPeriod);
+            }
+        }
+    }
+
+    private void UpdateDateRange(string selectedPeriod)
+    {
+        switch (selectedPeriod)
+        {
+            case "today":
+                startDate = DateTime.Today;
+                endDate = DateTime.Today;
+                break;
+            case "yesterday":
+                startDate = DateTime.Today.AddDays(-1);
+                endDate = DateTime.Today.AddDays(-1);
+                break;
+            case "last7days":
+                startDate = DateTime.Today.AddDays(-7);
+                endDate = DateTime.Today;
+                break;
+            case "lastweek":
+                var lastWeekStart = DateTime.Today.AddDays(-(int)DateTime.Today.DayOfWeek - 7);
+                var lastWeekEnd = lastWeekStart.AddDays(6);
+                startDate = lastWeekStart;
+                endDate = lastWeekEnd;
+                break;
+            case "thisweek":
+                var thisWeekStart = DateTime.Today.AddDays(-(int)DateTime.Today.DayOfWeek);
+                var thisWeekEnd = thisWeekStart.AddDays(6);
+                startDate = thisWeekStart;
+                endDate = thisWeekEnd;
+                break;
+            case "thismonth":
+                startDate = new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1);
+                endDate = startDate.AddMonths(1).AddDays(-1);
+                break;
+            case "lastmonth":
+                startDate = new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1).AddMonths(-1);
+                endDate = startDate.AddMonths(1).AddDays(-1);
+                break;
+            case "thisquarter":
+                var currentQuarter = (DateTime.Today.Month - 1) / 3 + 1;
+                startDate = new DateTime(DateTime.Today.Year, (currentQuarter - 1) * 3 + 1, 1);
+                endDate = startDate.AddMonths(3).AddDays(-1);
+                break;
+            case "lastquarter":
+                var lastQuarter = (DateTime.Today.Month - 1) / 3;
+                startDate = new DateTime(DateTime.Today.Year, (lastQuarter - 1) * 3 + 1, 1).AddMonths(-3);
+                endDate = startDate.AddMonths(3).AddDays(-1);
+                break;
+            default:
+                startDate = DateTime.Today;
+                endDate = DateTime.Today;
+                break;
+        }
+    }
 
     private string SelectedTable
     {
@@ -68,13 +165,6 @@
         }
     }
 
-    @* private void HandleValueChanged(DateTime value)
-{
-selectedDate = value;
-exchangeRates = null; // Reset exchangeRates when selectedTable changes
-errorMessage = null; // Reset errorMessage when selectedTable changes
-} *@
-
     async Task FetchCurrencyRates()
     {
         // Display spinner.
@@ -87,7 +177,6 @@ errorMessage = null; // Reset errorMessage when selectedTable changes
             endDate.ToString("yyyy-MM-dd")
         ).ConfigureAwait(false);
         // Hide spinner.
-
         isDataLoading = false;
     }
 }
