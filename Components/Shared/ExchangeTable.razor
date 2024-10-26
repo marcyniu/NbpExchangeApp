@@ -63,23 +63,7 @@ else
     <br />
     <br />
 
-    @if (isDataLoading == true)
-    {
-        <LoadingSpinner isDataLoading="@isDataLoading" />
-    }
-    // Table specific stuff:
-    else if (isDataLoading == false && !string.IsNullOrEmpty(errorMessage))
-    {
-        <div class="alert alert-danger" role="alert" style="width: 25%;">
-            @errorMessage
-        </div>
-    }
-    else
-    {
-        <div class="alert alert-warning" role="alert" style="width: 25%;">
-            No exchange rates requested.
-        </div>
-    }
+    <MessageViewer isDataLoading="@isDataLoading" errorMessage="@errorMessage" />
 }
 
 @code {

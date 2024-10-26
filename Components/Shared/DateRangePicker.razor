@@ -1,4 +1,5 @@
 @using Microsoft.AspNetCore.Components.Forms
+@using NbpExchangeApp.BusinessModels
 
 <div class="mb-3 row">
     <label for="SelectedPeriod" class="col-sm-2 col-form-label text-end">Pick Period:</label>
@@ -20,11 +21,13 @@
 
 @code {
     [Parameter]
-    public EventCallback<List<DateTime>> OnValueChanged { get; set; }
-
-    private DateTime startDate { get; set; } = DateTime.Now;
-    private DateTime endDate { get; set; } = DateTime.Now;
+    public required DateTime startDate { get; set; }
+    [Parameter]
+    public required DateTime endDate { get; set; }
     private string selectedPeriod = "today"; // Default value
+
+    [Parameter]
+    public EventCallback<DateRangeSelection> OnValueChanged { get; set; }
 
     private string SelectedPeriod {
         get => selectedPeriod;
@@ -33,12 +36,23 @@
             if (selectedPeriod != value)
             {
                 selectedPeriod = value;
-                UpdateDateRange(selectedPeriod);
+
+                // Update the start and end dates based on the selected period.
+                UpdateDateRange();
+
+                // Invoke the callback with the new date range.
+                var dateRangeSelection = new DateRangeSelection() {
+                    StartDate = startDate,
+                    EndDate = endDate
+                };
+
+                // Notify parent component of the change.
+                OnValueChanged.InvokeAsync(dateRangeSelection);
             }
         }
     }
 
-    private void UpdateDateRange(string selectedPeriod)
+    private void UpdateDateRange()
     {
         switch (selectedPeriod)
         {
@@ -89,7 +103,5 @@
                 endDate = DateTime.Today;
                 break;
         }
-
-        OnValueChanged.InvokeAsync([startDate, endDate]);
     }
 }

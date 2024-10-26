@@ -12,7 +12,8 @@
 </div>
 
 @code {
-    private string selectedTable = "A"; // Default value
+    [Parameter]
+    public required string selectedTable { get; set; }
 
     [Parameter]
     public EventCallback<string> OnValueChanged { get; set; }

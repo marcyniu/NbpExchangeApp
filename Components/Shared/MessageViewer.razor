@@ -1,0 +1,19 @@
+@if (isDataLoading == true)
+{
+    <LoadingSpinner />
+}
+    else if (isDataLoading == false && !string.IsNullOrEmpty(errorMessage))
+{
+    <ErrorMessage errorMessage="@errorMessage" />
+}
+else
+{
+    <NoRequestSent />
+}
+
+@code {
+    [Parameter]
+    public bool isDataLoading { get; set; } = false;
+    [Parameter]
+    public string? errorMessage { get; set; } = null;
+}
