@@ -1,0 +1,39 @@
+@using System.Text.Json
+@using NbpExchangeApp.BusinessModels
+
+@if (exchangeCurrency != null && exchangeCurrency?.Rates != null)
+{
+    <div>
+        <h3>Currency Chart</h3>
+        <canvas id="currencyChart"></canvas>
+
+        <p>Serlialized object:</p>
+        <pre>@SerializedData()</pre>
+    </div>
+} else
+{
+    <br />
+    <br />
+
+    <MessageViewer isDataLoading="@isDataLoading" errorMessage="@errorMessage" />
+}
+
+
+@code {
+    [Parameter]
+    public required ExchangeCurrency exchangeCurrency { get; set; }
+    [Parameter]
+    public string? errorMessage { get; set; } = null;
+    [Parameter]
+    public bool isDataLoading { get; set; } = false;
+    
+    private string SerializedData()
+    {
+        var options = new JsonSerializerOptions
+        {
+            WriteIndented = true // Enables pretty printing.
+        };
+        // Serialize data for the chart.
+        return JsonSerializer.Serialize(exchangeCurrency, options);
+    }
+}

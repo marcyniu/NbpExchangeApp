@@ -21,7 +21,7 @@
 
 <DateRangePicker startDate="@startDate" endDate="@endDate" OnValueChanged="HandleDateRangeChanged"/>
 
-<span> add all the pickers for table, currency code, start and end date </span>
+@* <span> add all the pickers for table, currency code, start and end date </span>
 
 <p>@selectedTable</p>
 <p>@currencyCode</p>
@@ -31,14 +31,11 @@
 <p>@errorMessage</p>
 
 <br />
-<br />
+<br /> *@
 
 <button type="button" class="btn btn-primary" @onclick="FetchCurrencyRates">Fetch Currency Rates</button>
 
-<br />
-<br />
-
-<MessageViewer isDataLoading="@isDataLoading" errorMessage="@errorMessage" />
+<CurrencyChart exchangeCurrency="@exchangeCurrency" errorMessage="@errorMessage" isDataLoading="@isDataLoading"/>
 
 @code {
     private string currencyCode = "USD"; // Default value

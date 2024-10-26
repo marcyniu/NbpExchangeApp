@@ -17,7 +17,7 @@
 
 <button type="button" class="btn btn-primary" @onclick="FetchExchangeRates" disabled="@exchangeRates">Fetch Exchange Rates</button>
 
-<ExchangeTable exchangeRates="@exchangeRates" errorMessage="@errorMessage" isDataLoading="@isDataLoading"/>
+<ExchangeTable exchangeRates="@exchangeRates" errorMessage="@errorMessage" isDataLoading="@isDataLoading" />
 
 @code {
     private string selectedTable = "A"; // Default value
