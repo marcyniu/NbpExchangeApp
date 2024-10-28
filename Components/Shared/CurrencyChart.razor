@@ -1,14 +1,28 @@
 @using System.Text.Json
 @using NbpExchangeApp.BusinessModels
+@inject IJSRuntime JS
 
 @if (exchangeCurrency != null && exchangeCurrency?.Rates != null)
 {
     <div>
         <h3>Currency Chart</h3>
-        <canvas id="currencyChart"></canvas>
+
+        <br />
+        <br />
+
+        <button @onclick="CallJavaScript">Replace Value</button>
+
+        <br />
+        <br />
+
+        <div id="currencyChart"> Here should be a chart. </div>
+
+        <br />
+        <br />
 
         <p>Serlialized object:</p>
         <pre>@SerializedData()</pre>
+
     </div>
 } else
 {
@@ -21,19 +35,77 @@
 
 @code {
     [Parameter]
-    public required ExchangeCurrency exchangeCurrency { get; set; }
+    public required ExchangeCurrency passedExchangeCurrency { get; set; }
     [Parameter]
     public string? errorMessage { get; set; } = null;
     [Parameter]
     public bool isDataLoading { get; set; } = false;
-    
+    private bool hasInitialized = false;
+    public required ExchangeCurrency exchangeCurrency { get; set; }
+
+    @* protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            //await JS.InvokeVoidAsync("addChartHookToPage");
+            await JS.InvokeVoidAsync("replaceValue");
+            hasInitialized = true;
+        }
+    } *@
+
+    public override async Task SetParametersAsync(ParameterView parameters)
+    {
+        await base.SetParametersAsync(parameters);
+        if (parameters.TryGetValue<ExchangeCurrency>(nameof(passedExchangeCurrency), out var newExchangeCurrency))
+        {
+            if (newExchangeCurrency != exchangeCurrency)
+            {
+                exchangeCurrency = newExchangeCurrency;
+                await CallJavaScript();
+            }
+        }
+
+    }
+
+    private async Task CallJavaScript()
+    {
+        await JS.InvokeVoidAsync("replaceValue");
+    }
+
     private string SerializedData()
     {
         var options = new JsonSerializerOptions
         {
             WriteIndented = true // Enables pretty printing.
         };
+
         // Serialize data for the chart.
         return JsonSerializer.Serialize(exchangeCurrency, options);
     }
 }
+
+<script>
+    
+    @* function addChartHookToPage() {
+        window.createChart = ("currencyChart", chartData) => {
+            const ctx = document.getElementById("currencyChart").getContext("2d");
+            new Chart(ctx, chartData);
+        };
+    } *@
+
+    var replaceValue = function() {
+
+console.log("Before getting placaholder");
+
+        setTimeout(function() {
+            var placaholder = document.getElementById("currencyChart");
+
+            console.log("placeholder : " + placaholder);
+
+            placaholder.innerHTML = "This is new value replaced.";
+
+            console.log("After replacing value");
+        }, 5000);
+
+    }
+</script>

@@ -35,7 +35,7 @@
 
 <button type="button" class="btn btn-primary" @onclick="FetchCurrencyRates">Fetch Currency Rates</button>
 
-<CurrencyChart exchangeCurrency="@exchangeCurrency" errorMessage="@errorMessage" isDataLoading="@isDataLoading"/>
+<CurrencyChart passedExchangeCurrency="@exchangeCurrency" errorMessage="@errorMessage" isDataLoading="@isDataLoading"/>
 
 @code {
     private string currencyCode = "USD"; // Default value
