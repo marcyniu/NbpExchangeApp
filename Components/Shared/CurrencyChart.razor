@@ -2,26 +2,18 @@
 @using NbpExchangeApp.BusinessModels
 @inject IJSRuntime JS
 
-@if (exchangeCurrency != null && exchangeCurrency?.Rates != null)
+@rendermode InteractiveServer
+
+@if (ExchangeCurrency != null && ExchangeCurrency?.Rates != null)
 {
     <div>
-        <h3>Currency Chart</h3>
-
-        <br />
         <br />
 
-        <button @onclick="CallJavaScript">Replace Value</button>
+        <h4><b>Currency Chart</b></h4>
 
         <br />
-        <br />
 
-        <div id="currencyChart"> Here should be a chart. </div>
-
-        <br />
-        <br />
-
-        <p>Serlialized object:</p>
-        <pre>@SerializedData()</pre>
+        <canvas id="@chartId" style="width: auto; height: 400px;"></canvas>
 
     </div>
 } else
@@ -29,83 +21,142 @@
     <br />
     <br />
 
-    <MessageViewer isDataLoading="@isDataLoading" errorMessage="@errorMessage" />
+    <MessageViewer isDataLoading="@IsDataLoading" errorMessage="@ErrorMessage" />
 }
 
 
 @code {
     [Parameter]
-    public required ExchangeCurrency passedExchangeCurrency { get; set; }
+    public required ExchangeCurrency ExchangeCurrency { get; set; }
     [Parameter]
-    public string? errorMessage { get; set; } = null;
+    public string? ErrorMessage { get; set; } = null;
     [Parameter]
-    public bool isDataLoading { get; set; } = false;
+    public bool IsDataLoading { get; set; } = false;
     private bool hasInitialized = false;
-    public required ExchangeCurrency exchangeCurrency { get; set; }
+    private List<string> labels = new ();
+    private List<decimal> dataMid = new ();
+    private List<decimal> dataAsk = new ();
+    private List<decimal> dataBid = new ();
 
-    @* protected override async Task OnAfterRenderAsync(bool firstRender)
+    private string chartId = "lineChart" + Guid.NewGuid().ToString("N"); // Unique ID for the chart
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (firstRender)
+        if (ExchangeCurrency != null)
         {
-            //await JS.InvokeVoidAsync("addChartHookToPage");
-            await JS.InvokeVoidAsync("replaceValue");
-            hasInitialized = true;
+            await CreateChart();
         }
-    } *@
+    }
 
-    public override async Task SetParametersAsync(ParameterView parameters)
+    private void BuildDataForChart()
     {
-        await base.SetParametersAsync(parameters);
-        if (parameters.TryGetValue<ExchangeCurrency>(nameof(passedExchangeCurrency), out var newExchangeCurrency))
+        if (ExchangeCurrency?.Rates != null)
         {
-            if (newExchangeCurrency != exchangeCurrency)
+            labels.Clear();
+            dataAsk.Clear();
+            dataBid.Clear();
+            dataMid.Clear();
+            foreach (var rate in ExchangeCurrency.Rates)
             {
-                exchangeCurrency = newExchangeCurrency;
-                await CallJavaScript();
+                labels.Add(rate.EffectiveDate ?? string.Empty);
+                if (rate.Ask != null) {
+                    dataAsk.Add(rate.Ask ?? 0);
+                }
+                if (rate.Bid != null) {
+                    dataBid.Add(rate.Bid ?? 0);
+                }
+                if (rate.Mid != null) {
+                    dataMid.Add(rate.Mid ?? 0);
+                }
             }
         }
-
     }
 
-    private async Task CallJavaScript()
+    private async Task CreateChart()
     {
-        await JS.InvokeVoidAsync("replaceValue");
-    }
+        BuildDataForChart();
 
-    private string SerializedData()
-    {
-        var options = new JsonSerializerOptions
+        var preparedDatasets = new List<object>();
+
+        if (dataMid.Any())
         {
-            WriteIndented = true // Enables pretty printing.
+            preparedDatasets.Add(new
+            {
+                label = $"Mid Exchange Rate [ PLN / {ExchangeCurrency.Code} ]",
+                data = dataMid,
+                borderColor = "blue",
+                fill = false
+            });
+        }
+
+        if (dataBid.Any())
+        {
+            preparedDatasets.Add(new
+            {
+                label = $"Bid Exchange Rate [ PLN / {ExchangeCurrency.Code} ]",
+                data = dataBid,
+                borderColor = "red",
+                fill = true
+            });
+        }
+
+        if (dataAsk.Any())
+        {
+            preparedDatasets.Add(new
+            {
+                label = $"Ask Exchange Rate [ PLN / {ExchangeCurrency.Code} ]",
+                data = dataAsk,
+                borderColor = "green",
+                fill = true
+            });
+        }
+
+        var chartData = new
+        {
+            type = "line",
+            data = new
+            {
+                labels = labels,
+                datasets = preparedDatasets
+            },
+            options = new
+            {
+                responsive = false,
+                plugins = new
+                {
+                    legend = new
+                    {
+                        display = true,
+                        position = "top"
+                    }
+                },
+                scales = new
+                {
+                    x = new { title = new { display = true, text = "Date" } },
+                    y = new { title = new { display = true, text = $"PLN / {ExchangeCurrency.Code}" } }
+                }
+            }
         };
 
-        // Serialize data for the chart.
-        return JsonSerializer.Serialize(exchangeCurrency, options);
+        await JS.InvokeVoidAsync("createChart", chartId, chartData);
     }
 }
 
-<script>
-    
-    @* function addChartHookToPage() {
-        window.createChart = ("currencyChart", chartData) => {
-            const ctx = document.getElementById("currencyChart").getContext("2d");
-            new Chart(ctx, chartData);
-        };
-    } *@
+<script type="text/javascript">
 
-    var replaceValue = function() {
+    var chart = null;
 
-console.log("Before getting placaholder");
+    function createChart(chartId, chartData) {
+        var canvas = document.getElementById(chartId);
+        if (canvas) {
+            var ctx = canvas.getContext('2d');
 
-        setTimeout(function() {
-            var placaholder = document.getElementById("currencyChart");
+            if (chart) {
+                chart.destroy(); // Destroy the previous chart instance if it exists
+            }
 
-            console.log("placeholder : " + placaholder);
-
-            placaholder.innerHTML = "This is new value replaced.";
-
-            console.log("After replacing value");
-        }, 5000);
-
+            // Create new chart.
+            chart = new Chart(ctx, chartData);
+        }
     }
 </script>

@@ -10,6 +10,12 @@ namespace NbpExchangeApp.BusinessModels
         [JsonPropertyName("effectiveDate")]
         public string? EffectiveDate { get; set; }
 
+        [JsonPropertyName("ask")]
+        public decimal? Ask { get; set; }
+        
+        [JsonPropertyName("bid")]
+        public decimal? Bid { get; set; }
+        
         [JsonPropertyName("mid")]
         public decimal? Mid { get; set; }
     }

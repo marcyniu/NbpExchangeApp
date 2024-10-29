@@ -21,21 +21,9 @@
 
 <DateRangePicker startDate="@startDate" endDate="@endDate" OnValueChanged="HandleDateRangeChanged"/>
 
-@* <span> add all the pickers for table, currency code, start and end date </span>
+<button type="button" class="btn btn-primary" @onclick="FetchCurrencyRates" disabled="@exchangeCurrency">Fetch Currency Rates</button>
 
-<p>@selectedTable</p>
-<p>@currencyCode</p>
-<p>@startDate</p>
-<p>@endDate</p>
-
-<p>@errorMessage</p>
-
-<br />
-<br /> *@
-
-<button type="button" class="btn btn-primary" @onclick="FetchCurrencyRates">Fetch Currency Rates</button>
-
-<CurrencyChart passedExchangeCurrency="@exchangeCurrency" errorMessage="@errorMessage" isDataLoading="@isDataLoading"/>
+<CurrencyChart ExchangeCurrency="@exchangeCurrency" ErrorMessage="@errorMessage" IsDataLoading="@isDataLoading"/>
 
 @code {
     private string currencyCode = "USD"; // Default value
@@ -50,17 +38,26 @@
     private void HandleExchangeTableChange(string value)
     {
         selectedTable = value;
+        ResetValuesDependOnSelectedValues();
     }
 
     private void HandleCurrencyChange(string value)
     {
         currencyCode = value;
+        ResetValuesDependOnSelectedValues();
     }
 
     private void HandleDateRangeChanged(DateRangeSelection dateRangeSelection)
     {
-        this.startDate = dateRangeSelection.StartDate;
-        this.endDate = dateRangeSelection.EndDate;
+        startDate = dateRangeSelection.StartDate;
+        endDate = dateRangeSelection.EndDate;
+        ResetValuesDependOnSelectedValues();
+    }
+
+    private void ResetValuesDependOnSelectedValues()
+    {
+        exchangeCurrency = null; // Reset exchangeCurrency when selectedTable changes
+        errorMessage = null; // Reset errorMessage when selectedTable changes
     }
 
     async Task FetchCurrencyRates()

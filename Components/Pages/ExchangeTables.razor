@@ -26,19 +26,6 @@
     private bool isDataLoading = false;
     private DateTime selectedDate {get; set;} = DateTime.Today;
 
-    private string SelectedTable
-    {
-        get => selectedTable;
-        set
-        {
-            if (selectedTable != value)
-            {
-                selectedTable = value;
-                ResetValuesDependOnSelectedValues();
-            }
-        }
-    }
-
     private void HandleDateChanged(DateTime value)
     {
         selectedDate = value;
