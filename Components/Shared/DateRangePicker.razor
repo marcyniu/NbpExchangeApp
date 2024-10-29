@@ -76,7 +76,7 @@
                 break;
             case "thisweek":
                 var thisWeekStart = DateTime.Today.AddDays(-(int)DateTime.Today.DayOfWeek);
-                var thisWeekEnd = thisWeekStart.AddDays(6);
+                var thisWeekEnd = thisWeekStart.AddDays(6) < DateTime.Today ? thisWeekStart.AddDays(6) : DateTime.Today;
                 startDate = thisWeekStart;
                 endDate = thisWeekEnd;
                 break;
