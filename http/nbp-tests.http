@@ -1,0 +1,11 @@
+// Variables:
+@baseUrl = https://api.nbp.pl/api
+
+// Get table A response from NBP API (json):
+get {{baseUrl}}/exchangerates/tables/A/?format=json
+Content-Type: application/json
+
+###
+
+// Get table A response from NBP API (xml):
+get {{baseUrl}}/exchangerates/tables/A/?format=xml
