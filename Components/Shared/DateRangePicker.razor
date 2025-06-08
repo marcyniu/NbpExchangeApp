@@ -96,10 +96,9 @@
                 endDate = startDate.AddMonths(3).AddDays(-1) < DateTime.Today ? startDate.AddMonths(3).AddDays(-1) : DateTime.Today;
                 break;
             case "lastquarter":
-                var currentQuarterStartMonth = ((DateTime.Today.Month - 1) / 3) * 3 + 1;
-                var lastQuarterStartDate = new DateTime(DateTime.Today.Year, currentQuarterStartMonth, 1).AddMonths(-3);
-                startDate = lastQuarterStartDate;
-                endDate = lastQuarterStartDate.AddMonths(3).AddDays(-1);
+                var currentQuarter = (DateTime.Today.Month - 1) / 3;
+                startDate = new DateTime(DateTime.Today.Year, currentQuarter * 3 + 1, 1).AddMonths(-3);
+                endDate = startDate.AddMonths(3).AddDays(-1);
                 break;
             default:
                 startDate = DateTime.Today;
