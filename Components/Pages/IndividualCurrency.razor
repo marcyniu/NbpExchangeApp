@@ -21,7 +21,7 @@
 
 <DateRangePicker startDate="@startDate" endDate="@endDate" OnValueChanged="HandleDateRangeChanged"/>
 
-<button type="button" class="btn btn-primary" @onclick="FetchCurrencyRates" disabled="@exchangeCurrency">Fetch Currency Rates</button>
+<button type="button" class="btn btn-primary" @onclick="FetchCurrencyRates" disabled="@isDataLoading">Fetch Currency Rates</button>
 
 <CurrencyChart ExchangeCurrency="@exchangeCurrency" ErrorMessage="@errorMessage" IsDataLoading="@isDataLoading"/>
 
